@@ -15,7 +15,6 @@ export default function Home() {
       const token = getAuthToken();
       
       if (token) {
-        // Validate the token with the backend
         const isValid = await validateToken();
         
         if (isValid) {
