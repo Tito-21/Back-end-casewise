@@ -40,12 +40,18 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#f8fafc" }}
+      >
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-800 rounded-2xl mb-4">
+          <div 
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+            style={{ backgroundColor: "#1e293b" }}
+          >
             <Scale className="w-8 h-8 text-white" />
           </div>
-          <div className="flex items-center justify-center gap-2 text-slate-600">
+          <div className="flex items-center justify-center gap-2" style={{ color: "#475569" }}>
             <Loader2 className="w-5 h-5 animate-spin" />
             <span>Loading CaseWise...</span>
           </div>

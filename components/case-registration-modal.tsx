@@ -21,6 +21,16 @@ const CRIME_CATEGORIES = [
 const GENDERS = ["Male", "Female", "Other"];
 const ROLES = ["Witness", "Suspect", "Defendant", "Plaintiff", "Victim"];
 
+const inputStyle = {
+  width: "100%",
+  padding: "0.625rem 1rem",
+  border: "1px solid #d1d5db",
+  borderRadius: "0.5rem",
+  color: "#1e293b",
+  backgroundColor: "#ffffff",
+  outline: "none",
+};
+
 export default function CaseRegistrationModal({
   onClose,
   onCaseRegistered,
@@ -29,7 +39,6 @@ export default function CaseRegistrationModal({
   const [error, setError] = useState("");
   const [expandedPartyIndex, setExpandedPartyIndex] = useState<number | null>(null);
 
-  // Case Information
   const [caseTitle, setCaseTitle] = useState("");
   const [courtName, setCourtName] = useState("");
   const [caseSummary, setCaseSummary] = useState("");
@@ -39,7 +48,6 @@ export default function CaseRegistrationModal({
   const [crimeCommittedDate, setCrimeCommittedDate] = useState("");
   const [crimeCommittedTime, setCrimeCommittedTime] = useState("");
 
-  // Case Parties
   const [parties, setParties] = useState<CaseParty[]>([]);
   const [newParty, setNewParty] = useState<CaseParty>({
     firstName: "",
@@ -52,9 +60,7 @@ export default function CaseRegistrationModal({
   });
 
   const addParty = () => {
-    if (!newParty.firstName || !newParty.lastName || !newParty.role) {
-      return;
-    }
+    if (!newParty.firstName || !newParty.lastName || !newParty.role) return;
     setParties([...parties, { ...newParty }]);
     setNewParty({
       firstName: "",
@@ -75,7 +81,6 @@ export default function CaseRegistrationModal({
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
-
     setIsSubmitting(true);
     setError("");
 
@@ -110,14 +115,32 @@ export default function CaseRegistrationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+    >
+      <div 
+        className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col rounded-2xl"
+        style={{ backgroundColor: "#ffffff", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-xl font-semibold text-slate-800">Register New Case</h2>
+        <div 
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: "1px solid #e2e8f0" }}
+        >
+          <h2 className="text-xl font-semibold" style={{ color: "#1e293b" }}>Register New Case</h2>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors cursor-pointer"
+            style={{ color: "#9ca3af" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#f1f5f9";
+              e.currentTarget.style.color = "#475569";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "#9ca3af";
+            }}
           >
             <X className="w-5 h-5" />
           </button>
@@ -126,197 +149,137 @@ export default function CaseRegistrationModal({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
+            <div 
+              className="p-3 rounded-lg flex items-center gap-2 text-sm"
+              style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626" }}
+            >
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Case Information Section */}
+          {/* Case Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800 flex items-center gap-2">
-              Case Information
-            </h3>
+            <h3 className="text-lg font-medium" style={{ color: "#1e293b" }}>Case Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Case Title <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>
+                  Case Title <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   type="text"
                   value={caseTitle}
                   onChange={(e) => setCaseTitle(e.target.value)}
                   placeholder="Enter case title"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400"
+                  style={inputStyle}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Court Name
-                </label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Court Name</label>
                 <input
                   type="text"
                   value={courtName}
                   onChange={(e) => setCourtName(e.target.value)}
                   placeholder="Enter court name"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400"
+                  style={inputStyle}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Crime Category
-                </label>
-                <select
-                  value={crimeCategory}
-                  onChange={(e) => setCrimeCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 text-slate-700 bg-white"
-                >
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Crime Category</label>
+                <select value={crimeCategory} onChange={(e) => setCrimeCategory(e.target.value)} style={inputStyle}>
                   <option value="">Select category</option>
-                  {CRIME_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
+                  {CRIME_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Crime Type
-                </label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Crime Type</label>
                 <input
                   type="text"
                   value={crimeType}
                   onChange={(e) => setCrimeType(e.target.value)}
                   placeholder="Enter crime type"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400"
+                  style={inputStyle}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Crime Committed Date
-                </label>
-                <input
-                  type="date"
-                  value={crimeCommittedDate}
-                  onChange={(e) => setCrimeCommittedDate(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 text-slate-700 bg-white"
-                />
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Crime Date</label>
+                <input type="date" value={crimeCommittedDate} onChange={(e) => setCrimeCommittedDate(e.target.value)} style={inputStyle} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Crime Committed Time
-                </label>
-                <input
-                  type="time"
-                  value={crimeCommittedTime}
-                  onChange={(e) => setCrimeCommittedTime(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 text-slate-700 bg-white"
-                />
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Crime Time</label>
+                <input type="time" value={crimeCommittedTime} onChange={(e) => setCrimeCommittedTime(e.target.value)} style={inputStyle} />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Crime Description
-                </label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Crime Description</label>
                 <textarea
                   value={crimeDescription}
                   onChange={(e) => setCrimeDescription(e.target.value)}
                   placeholder="Describe the crime details"
                   rows={2}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400 resize-none"
+                  style={{ ...inputStyle, resize: "none" }}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Case Summary
-                </label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: "#374151" }}>Case Summary</label>
                 <textarea
                   value={caseSummary}
                   onChange={(e) => setCaseSummary(e.target.value)}
                   placeholder="Provide a summary of the case"
                   rows={3}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400 resize-none"
+                  style={{ ...inputStyle, resize: "none" }}
                 />
               </div>
             </div>
           </div>
 
-          {/* Case Party Section */}
+          {/* Case Parties */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-slate-800">
-              Case Parties <span className="text-red-500">*</span>
+            <h3 className="text-lg font-medium" style={{ color: "#1e293b" }}>
+              Case Parties <span style={{ color: "#ef4444" }}>*</span>
             </h3>
 
-            {/* Existing Parties */}
             {parties.length > 0 && (
               <div className="space-y-2">
                 {parties.map((party, index) => (
-                  <div
-                    key={index}
-                    className="border border-slate-200 rounded-lg overflow-hidden"
-                  >
+                  <div key={index} className="rounded-lg overflow-hidden" style={{ border: "1px solid #e2e8f0" }}>
                     <button
-                      onClick={() =>
-                        setExpandedPartyIndex(
-                          expandedPartyIndex === index ? null : index
-                        )
-                      }
-                      className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
+                      onClick={() => setExpandedPartyIndex(expandedPartyIndex === index ? null : index)}
+                      className="w-full flex items-center justify-between px-4 py-3 cursor-pointer"
+                      style={{ backgroundColor: "#f8fafc" }}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-slate-600" />
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#e2e8f0" }}>
+                          <User className="w-4 h-4" style={{ color: "#475569" }} />
                         </div>
                         <div className="text-left">
-                          <p className="font-medium text-slate-800">
-                            {party.firstName} {party.lastName}
-                          </p>
-                          <span className="text-xs px-2 py-0.5 bg-slate-200 text-slate-700 rounded-full">
-                            {party.role}
-                          </span>
+                          <p className="font-medium" style={{ color: "#1e293b" }}>{party.firstName} {party.lastName}</p>
+                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#e2e8f0", color: "#374151" }}>{party.role}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeParty(index);
-                          }}
-                          className="text-red-500 hover:text-red-700 text-sm"
+                          onClick={(e) => { e.stopPropagation(); removeParty(index); }}
+                          className="text-sm cursor-pointer"
+                          style={{ color: "#ef4444" }}
                         >
                           Remove
                         </button>
-                        {expandedPartyIndex === index ? (
-                          <ChevronUp className="w-4 h-4 text-slate-400" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-slate-400" />
-                        )}
+                        {expandedPartyIndex === index ? <ChevronUp className="w-4 h-4" style={{ color: "#9ca3af" }} /> : <ChevronDown className="w-4 h-4" style={{ color: "#9ca3af" }} />}
                       </div>
                     </button>
                     {expandedPartyIndex === index && (
-                      <div className="px-4 py-3 bg-white border-t border-slate-100 grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-slate-500">Gender:</span>{" "}
-                          <span className="text-slate-800">{party.gender || "-"}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500">DOB:</span>{" "}
-                          <span className="text-slate-800">{party.dateOfBirth || "-"}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500">Phone:</span>{" "}
-                          <span className="text-slate-800">{party.phoneNumber || "-"}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-500">Email:</span>{" "}
-                          <span className="text-slate-800">{party.email || "-"}</span>
-                        </div>
+                      <div className="px-4 py-3 grid grid-cols-2 gap-3 text-sm" style={{ backgroundColor: "#ffffff", borderTop: "1px solid #f1f5f9" }}>
+                        <div><span style={{ color: "#64748b" }}>Gender:</span> <span style={{ color: "#1e293b" }}>{party.gender || "-"}</span></div>
+                        <div><span style={{ color: "#64748b" }}>DOB:</span> <span style={{ color: "#1e293b" }}>{party.dateOfBirth || "-"}</span></div>
+                        <div><span style={{ color: "#64748b" }}>Phone:</span> <span style={{ color: "#1e293b" }}>{party.phoneNumber || "-"}</span></div>
+                        <div><span style={{ color: "#64748b" }}>Email:</span> <span style={{ color: "#1e293b" }}>{party.email || "-"}</span></div>
                       </div>
                     )}
                   </div>
@@ -325,89 +288,30 @@ export default function CaseRegistrationModal({
             )}
 
             {/* Add New Party Form */}
-            <div className="bg-slate-50 rounded-lg p-4 space-y-4">
-              <p className="text-sm font-medium text-slate-700">Add a case party</p>
+            <div className="rounded-lg p-4 space-y-4" style={{ backgroundColor: "#f8fafc" }}>
+              <p className="text-sm font-medium" style={{ color: "#374151" }}>Add a case party</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={newParty.firstName}
-                  onChange={(e) =>
-                    setNewParty({ ...newParty, firstName: e.target.value })
-                  }
-                  placeholder="First Name *"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400 bg-white"
-                />
-                <input
-                  type="text"
-                  value={newParty.lastName}
-                  onChange={(e) =>
-                    setNewParty({ ...newParty, lastName: e.target.value })
-                  }
-                  placeholder="Last Name *"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400 bg-white"
-                />
-                <select
-                  value={newParty.gender}
-                  onChange={(e) =>
-                    setNewParty({ ...newParty, gender: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 text-slate-700 bg-white"
-                >
+                <input type="text" value={newParty.firstName} onChange={(e) => setNewParty({ ...newParty, firstName: e.target.value })} placeholder="First Name *" style={inputStyle} />
+                <input type="text" value={newParty.lastName} onChange={(e) => setNewParty({ ...newParty, lastName: e.target.value })} placeholder="Last Name *" style={inputStyle} />
+                <select value={newParty.gender} onChange={(e) => setNewParty({ ...newParty, gender: e.target.value })} style={inputStyle}>
                   <option value="">Select Gender</option>
-                  {GENDERS.map((g) => (
-                    <option key={g} value={g}>
-                      {g}
-                    </option>
-                  ))}
+                  {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
-                <input
-                  type="date"
-                  value={newParty.dateOfBirth}
-                  onChange={(e) =>
-                    setNewParty({ ...newParty, dateOfBirth: e.target.value })
-                  }
-                  placeholder="Date of Birth"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 text-slate-700 bg-white"
-                />
-                <input
-                  type="tel"
-                  value={newParty.phoneNumber}
-                  onChange={(e) =>
-                    setNewParty({ ...newParty, phoneNumber: e.target.value })
-                  }
-                  placeholder="Phone Number"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400 bg-white"
-                />
-                <input
-                  type="email"
-                  value={newParty.email}
-                  onChange={(e) =>
-                    setNewParty({ ...newParty, email: e.target.value })
-                  }
-                  placeholder="Email Address"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-slate-800 placeholder:text-slate-400 bg-white"
-                />
+                <input type="date" value={newParty.dateOfBirth} onChange={(e) => setNewParty({ ...newParty, dateOfBirth: e.target.value })} style={inputStyle} />
+                <input type="tel" value={newParty.phoneNumber} onChange={(e) => setNewParty({ ...newParty, phoneNumber: e.target.value })} placeholder="Phone Number" style={inputStyle} />
+                <input type="email" value={newParty.email} onChange={(e) => setNewParty({ ...newParty, email: e.target.value })} placeholder="Email Address" style={inputStyle} />
                 <div className="md:col-span-2">
-                  <select
-                    value={newParty.role}
-                    onChange={(e) =>
-                      setNewParty({ ...newParty, role: e.target.value })
-                    }
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 text-slate-700 bg-white"
-                  >
+                  <select value={newParty.role} onChange={(e) => setNewParty({ ...newParty, role: e.target.value })} style={inputStyle}>
                     <option value="">Select Role *</option>
-                    {ROLES.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
+                    {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
               </div>
               <button
                 onClick={addParty}
                 disabled={!newParty.firstName || !newParty.lastName || !newParty.role}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ color: "#374151", backgroundColor: "#ffffff", border: "1px solid #d1d5db" }}
               >
                 <Plus className="w-4 h-4" />
                 Add Case Party
@@ -417,17 +321,22 @@ export default function CaseRegistrationModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div 
+          className="flex items-center justify-end gap-3 px-6 py-4"
+          style={{ borderTop: "1px solid #e2e8f0", backgroundColor: "#f8fafc" }}
+        >
           <button
             onClick={onClose}
-            className="px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors"
+            className="px-4 py-2.5 text-sm font-medium rounded-lg cursor-pointer"
+            style={{ color: "#374151", border: "1px solid #d1d5db" }}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting}
-            className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: "#059669", color: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}
           >
             {isSubmitting ? (
               <>
