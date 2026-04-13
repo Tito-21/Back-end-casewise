@@ -4,6 +4,7 @@ import "./globals.css";
 
 const inter = Inter({ 
   subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1e293b",
+  themeColor: "#09090b",
 };
 
 export default function RootLayout({
@@ -23,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" className="bg-background">
+      <body className={`${inter.className} antialiased min-h-screen bg-background text-foreground`}>
         {children}
       </body>
     </html>

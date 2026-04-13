@@ -28,59 +28,42 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       } else {
         setError(response.message || "Invalid email or password");
       }
-    } catch (err) {
+    } catch {
       setError("Unable to connect to server. Please try again.");
-      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" }}
-    >
+    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div 
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{ backgroundColor: "#1e293b", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.2)" }}
-          >
-            <Scale className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4 shadow-lg shadow-primary/20">
+            <Scale className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight" style={{ color: "#1e293b" }}>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             CaseWise
           </h1>
-          <p className="mt-2" style={{ color: "#64748b" }}>
+          <p className="mt-2 text-muted-foreground">
             Legal Case Management System
           </p>
         </div>
 
         {/* Login Card */}
-        <div 
-          className="rounded-2xl p-8"
-          style={{ 
-            backgroundColor: "#ffffff", 
-            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)",
-            border: "1px solid #e2e8f0"
-          }}
-        >
+        <div className="bg-card rounded-2xl p-8 border border-border shadow-2xl">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold" style={{ color: "#1e293b" }}>
+            <h2 className="text-xl font-semibold text-foreground">
               Welcome back
             </h2>
-            <p className="text-sm mt-1" style={{ color: "#64748b" }}>
+            <p className="text-sm mt-1 text-muted-foreground">
               Sign in to access your dashboard
             </p>
           </div>
 
           {error && (
-            <div 
-              className="mb-4 p-3 rounded-lg flex items-center gap-2 text-sm"
-              style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626" }}
-            >
+            <div className="mb-4 p-3 rounded-lg flex items-center gap-2 text-sm bg-destructive/10 border border-destructive/20 text-destructive">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -88,18 +71,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label 
-                htmlFor="email" 
-                className="block text-sm font-medium mb-1.5"
-                style={{ color: "#374151" }}
-              >
+              <label htmlFor="email" className="block text-sm font-medium mb-1.5 text-foreground">
                 Email Address
               </label>
               <div className="relative">
-                <Mail 
-                  className="absolute left-3 top-1/2 w-5 h-5" 
-                  style={{ transform: "translateY(-50%)", color: "#9ca3af" }}
-                />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   id="email"
                   type="email"
@@ -107,36 +83,17 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg transition-all outline-none"
-                  style={{ 
-                    border: "1px solid #d1d5db",
-                    color: "#1e293b",
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#1e293b";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(30,41,59,0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#d1d5db";
-                    e.target.style.boxShadow = "none";
-                  }}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label 
-                htmlFor="password" 
-                className="block text-sm font-medium mb-1.5"
-                style={{ color: "#374151" }}
-              >
+              <label htmlFor="password" className="block text-sm font-medium mb-1.5 text-foreground">
                 Password
               </label>
               <div className="relative">
-                <Lock 
-                  className="absolute left-3 top-1/2 w-5 h-5" 
-                  style={{ transform: "translateY(-50%)", color: "#9ca3af" }}
-                />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   id="password"
                   type="password"
@@ -144,19 +101,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg transition-all outline-none"
-                  style={{ 
-                    border: "1px solid #d1d5db",
-                    color: "#1e293b",
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#1e293b";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(30,41,59,0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#d1d5db";
-                    e.target.style.boxShadow = "none";
-                  }}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -164,17 +109,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full font-medium py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ 
-                backgroundColor: "#1e293b", 
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading) e.currentTarget.style.backgroundColor = "#334155";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#1e293b";
-              }}
+              className="w-full font-medium py-2.5 px-4 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -187,14 +122,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 text-center" style={{ borderTop: "1px solid #f1f5f9" }}>
-            <p className="text-sm" style={{ color: "#64748b" }}>
+          <div className="mt-6 pt-6 text-center border-t border-border">
+            <p className="text-sm text-muted-foreground">
               Need an account? Contact your administrator
             </p>
           </div>
         </div>
 
-        <p className="text-center text-sm mt-6" style={{ color: "#94a3b8" }}>
+        <p className="text-center text-sm mt-6 text-muted-foreground">
           Secure legal case management
         </p>
       </div>
