@@ -1,0 +1,36 @@
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from datetime import datetime
+
+class DocumentUpload(BaseModel):
+    filename: str
+    file_type: str
+    file_size: int
+
+class DocumentResponse(BaseModel):
+    id: str
+    filename: str
+    file_type: str
+    chunk_count: int
+    uploaded_at: datetime
+    status: str
+
+class ChatRequest(BaseModel):
+    message: str
+    case_id: Optional[str] = None
+    conversation_id: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    sources: List[dict] = []
+    conversation_id: str
+
+class DocumentChunk(BaseModel):
+    content: str
+    metadata: dict
+    chunk_id: int
+
+class SearchResult(BaseModel):
+    content: str
+    metadata: dict
+    score: float

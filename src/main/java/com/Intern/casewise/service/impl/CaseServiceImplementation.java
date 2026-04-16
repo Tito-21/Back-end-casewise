@@ -42,6 +42,7 @@ public class CaseServiceImplementation implements CaseService {
         this.attachmentRepository = attachmentRepository;
     }
     @Override
+    @Transactional
     public List<CaseResponse> getAllCases() {
         return caseRepository.findAll()
                 .stream()
@@ -50,18 +51,21 @@ public class CaseServiceImplementation implements CaseService {
     }
     
     @Override
+    @Transactional
     public Optional<CaseResponse> getCaseById(Long id) {
         return caseRepository.findById(id)
                 .map(CaseResponse::fromEntity);
     }
     
     @Override
+    @Transactional
     public Optional<CaseResponse> getCaseByCaseNumber(String caseNumber) {
         return Optional.ofNullable(caseRepository.findByCaseNumber(caseNumber))
                 .map(CaseResponse::fromEntity);
     }
     
     @Override
+    @Transactional
     public List<CaseResponse> searchCases(String query) {
         if (query == null || query.trim().isEmpty()) {
             return getAllCases();
@@ -73,6 +77,7 @@ public class CaseServiceImplementation implements CaseService {
     }
     
     @Override
+    @Transactional
     public List<CaseResponse> getCasesByStatus(String status) {
         return caseRepository.findByStatus(status)
                 .stream()
