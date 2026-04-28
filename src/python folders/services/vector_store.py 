@@ -1,0 +1,310 @@
+import chromadb
+from chromadb.config import Settings
+from chromadb.utils import embedding_functions
+from typing import List, Dict, Optional
+import uuid
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+class VectorStoreConfig:
+    """ChromaDB configuration class"""
+    
+    def __init__(
+        self,
+        db_path: str = "./chroma_db",
+        collection_name: str = "legal_documents",
+        distance_metric: str = "cosine",  # cosine, l2, ip (inner product)
+        anonymized_telemetry: bool = False,
+        allow_reset: bool = True,
+        max_batch_size: int = 100
+    ):
+        self.db_path = db_path
+        self.collection_name = collection_name
+        self.distance_metric = distance_metric
+        self.anonymized_telemetry = anonymized_telemetry
+        self.allow_reset = allow_reset
+        self.max_batch_size = max_batch_size
+
+
+class VectorStore:
+    def __init__(self, config: VectorStoreConfig):
+        self.config = config
+        
+        # Initialize ChromaDB client with settings
+        self.client = chromadb.PersistentClient(
+            path=config.db_path,
+            settings=Settings(
+                anonymized_telemetry=config.anonymized_telemetry,
+                allow_reset=config.allow_reset,
+                # Performance settings
+                chroma_db_impl="duckdb+parquet",  # Default and recommended
+                # Security settings
+                chroma_server_auth_credentials_provider="chromadb.auth.token.TokenAuthCredentialsProvider",
+                chroma_server_auth_credentials="",  # Add token if needed
+            )
+        )
+        
+        # Create or get collection
+        self.collection = self._get_or_create_collection()
+        
+        logger.info(f"ChromaDB initialized at {config.db_path}")
+        logger.info(f"Collection: {config.collection_name}")
+        logger.info(f"Total documents: {self.collection.count()}")
+    
+    def _get_or_create_collection(self):
+        """Create or get existing collection with metadata"""
+        try:
+            # Try to get existing collection
+            collection = self.client.get_collection(
+                name=self.config.collection_name
+            )
+            logger.info(f"Loaded existing collection: {self.config.collection_name}")
+        except:
+            # Create new collection
+            collection = self.client.create_collection(
+                name=self.config.collection_name,
+                metadata={
+                    "description": "Legal documents for CaseWise",
+                    "created_at": datetime.utcnow().isoformat(),
+                    "distance_metric": self.config.distance_metric
+                },
+                # Distance function for similarity search
+                # Options: "cosine" (default), "l2", "ip" (inner product)
+                embedding_function=None  # We'll provide embeddings manually
+            )
+            logger.info(f"Created new collection: {self.config.collection_name}")
+        
+        return collection
+    
+    def add_documents(
+        self, 
+        chunks: List[dict], 
+        embeddings: List[List[float]],
+        batch_size: int = None
+    ) -> List[str]:
+        """Add document chunks to the vector store with batching"""
+        
+        batch_size = batch_size or self.config.max_batch_size
+        all_ids = []
+        
+        # Process in batches to avoid memory issues
+        for i in range(0, len(chunks), batch_size):
+            batch_chunks = chunks[i:i + batch_size]
+            batch_embeddings = embeddings[i:i + batch_size]
+            
+            # Generate unique IDs
+            ids = [str(uuid.uuid4()) for _ in batch_chunks]
+            
+            # Extract documents and metadata
+            documents = [chunk["content"] for chunk in batch_chunks]
+            metadatas = [
+                {
+                    **chunk["metadata"],
+                    "indexed_at": datetime.utcnow().isoformat(),
+                    "embedding_model": "all-MiniLM-L6-v2",  # Track which model was used
+                }
+                for chunk in batch_chunks
+            ]
+            
+            # Add to collection
+            self.collection.add(
+                ids=ids,
+                documents=documents,
+                embeddings=batch_embeddings,
+                metadatas=metadatas
+            )
+            
+            all_ids.extend(ids)
+            logger.info(f"Added batch {i // batch_size + 1}: {len(ids)} chunks")
+        
+        logger.info(f"Total chunks added: {len(all_ids)}")
+        return all_ids
+    
+    def search(
+        self, 
+        query_embedding: List[float], 
+        n_results: int = 5,
+        case_id: Optional[str] = None,
+        file_type: Optional[str] = None,
+        min_score: float = 0.0
+    ) -> Dict:
+        """
+        Search for similar documents with advanced filtering
+        
+        Args:
+            query_embedding: The embedding vector of the query
+            n_results: Number of results to return
+            case_id: Filter by specific case
+            file_type: Filter by file type (.pdf, .docx, etc.)
+            min_score: Minimum similarity score (0-1)
+        """
+        
+        # Build where filter
+        where_filter = {}
+        if case_id:
+            where_filter["case_id"] = case_id
+        if file_type:
+            where_filter["file_type"] = file_type
+        
+        # Query the collection
+        results = self.collection.query(
+            query_embeddings=[query_embedding],
+            n_results=n_results,
+            where=where_filter if where_filter else None,
+            include=["documents", "metadatas", "distances"]
+        )
+        
+        # Filter by minimum score if specified
+        if min_score > 0 and results['distances'] and results['distances'][0]:
+            filtered_results = {
+                'ids': [[]],
+                'documents': [[]],
+                'metadatas': [[]],
+                'distances': [[]]
+            }
+            
+            for idx, distance in enumerate(results['distances'][0]):
+                similarity = 1 - distance  # Convert distance to similarity
+                if similarity >= min_score:
+                    filtered_results['ids'][0].append(results['ids'][0][idx])
+                    filtered_results['documents'][0].append(results['documents'][0][idx])
+                    filtered_results['metadatas'][0].append(results['metadatas'][0][idx])
+                    filtered_results['distances'][0].append(distance)
+            
+            return filtered_results
+        
+        return results
+    
+    def delete_by_filename(self, filename: str) -> int:
+        """Delete all chunks of a specific file"""
+        try:
+            results = self.collection.get(
+                where={"filename": filename}
+            )
+            
+            if results['ids']:
+                self.collection.delete(ids=results['ids'])
+                logger.info(f"Deleted {len(results['ids'])} chunks for {filename}")
+                return len(results['ids'])
+            
+            return 0
+        except Exception as e:
+            logger.error(f"Error deleting document {filename}: {e}")
+            raise
+    
+    def delete_by_case_id(self, case_id: str) -> int:
+        """Delete all documents for a specific case"""
+        try:
+            results = self.collection.get(
+                where={"case_id": case_id}
+            )
+            
+            if results['ids']:
+                self.collection.delete(ids=results['ids'])
+                logger.info(f"Deleted {len(results['ids'])} chunks for case {case_id}")
+                return len(results['ids'])
+            
+            return 0
+        except Exception as e:
+            logger.error(f"Error deleting case {case_id}: {e}")
+            raise
+    
+    def update_metadata(self, document_id: str, metadata: Dict) -> bool:
+        """Update metadata for a specific document chunk"""
+        try:
+            self.collection.update(
+                ids=[document_id],
+                metadatas=[metadata]
+            )
+            logger.info(f"Updated metadata for {document_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error updating metadata: {e}")
+            return False
+    
+    def get_document_count(self) -> int:
+        """Get total number of chunks"""
+        return self.collection.count()
+    
+    def list_documents(self, case_id: Optional[str] = None) -> List[Dict]:
+        """List all unique documents with optional case filtering"""
+        try:
+            # Get all documents
+            if case_id:
+                all_docs = self.collection.get(where={"case_id": case_id})
+            else:
+                all_docs = self.collection.get()
+            
+            # Extract unique files
+            unique_files = {}
+            
+            for metadata in all_docs['metadatas']:
+                filename = metadata.get('filename')
+                if filename and filename not in unique_files:
+                    unique_files[filename] = {
+                        'filename': filename,
+                        'file_type': metadata.get('file_type'),
+                        'case_id': metadata.get('case_id'),
+                        'indexed_at': metadata.get('indexed_at'),
+                        'chunk_count': 1
+                    }
+                elif filename:
+                    unique_files[filename]['chunk_count'] += 1
+            
+            return list(unique_files.values())
+        except Exception as e:
+            logger.error(f"Error listing documents: {e}")
+            return []
+    
+    def get_document_by_id(self, doc_id: str) -> Optional[Dict]:
+        """Get a specific document chunk by ID"""
+        try:
+            result = self.collection.get(ids=[doc_id])
+            if result['ids']:
+                return {
+                    'id': result['ids'][0],
+                    'document': result['documents'][0],
+                    'metadata': result['metadatas'][0]
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error getting document {doc_id}: {e}")
+            return None
+    
+    def reset_collection(self) -> bool:
+        """Delete all documents in the collection (use with caution!)"""
+        try:
+            self.client.delete_collection(name=self.config.collection_name)
+            self.collection = self._get_or_create_collection()
+            logger.warning(f"Collection {self.config.collection_name} has been reset")
+            return True
+        except Exception as e:
+            logger.error(f"Error resetting collection: {e}")
+            return False
+    
+    def get_collection_info(self) -> Dict:
+        """Get collection statistics and metadata"""
+        return {
+            "name": self.collection.name,
+            "count": self.collection.count(),
+            "metadata": self.collection.metadata,
+            "unique_documents": len(self.list_documents())
+        }
+    
+    def backup_collection(self, backup_path: str) -> bool:
+        """Create a backup of the collection"""
+        try:
+            # Get all data
+            all_data = self.collection.get()
+            
+            import json
+            with open(backup_path, 'w') as f:
+                json.dump(all_data, f, indent=2)
+            
+            logger.info(f"Backup created at {backup_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Error creating backup: {e}")
+            return False

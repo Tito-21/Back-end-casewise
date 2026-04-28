@@ -35,3 +35,26 @@ build/
 ### Environment Variables ###
 .env
 *.env
+
+### Python ###
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+### ChromaDB & Data ###
+chroma_db/
+test_chroma_db/
+uploads/
+*.db
+*.sqlite3
+
+### Logs ###
+*.log
+server.log
